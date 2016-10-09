@@ -38,6 +38,46 @@ static void ICACHE_FLASH_ATTR mqttConnectedCb(uint32_t *args)
     MQTT_Subscribe(client, "/projectorControl_SOMEHASH", 0);
 
     MQTT_Publish(client, "/device/heartbeat", "hello2", 6, 2, 0);
+
+
+    if( Epson_init() != 0){
+        os_printf("Hmmm, communicating with the projector failed\n");
+        return;
+    }
+    
+    os_delay_us(200000); // 200 ms
+
+    PowerStateEnum pwrState = 0;
+    if( Epson_GetPowerState(&pwrState) < 0){
+        os_printf("Getting the power state totally failed\n");
+        return;
+    }
+
+    // give it a second
+    os_delay_us(200000); // 200 ms
+
+    switch(pwrState){
+        case e_standby:
+            // turn on projector
+            os_printf("Projector is off, so im gunna turn it on\n");
+            Epson_PowerOn();
+            break;
+        case e_poweredOn:
+            os_printf("Projector is on, so im gunna turn it off\n");
+            Epson_PowerOff();
+            break;
+        case e_warmUp:
+            os_printf("Projector is warmingUp, Doing Nothing\n");  
+            break;
+        case e_coolDown:
+            os_printf("Projector is cooling down, Doing Nothing\n");
+            break;
+        case e_networkStandby:
+        case e_abnormalStandby:
+        default:
+            os_printf("Current power state is %d\n", pwrState);
+            break;
+    }
 }
 
 static void ICACHE_FLASH_ATTR mqttDisconnectedCb(uint32_t *args)
@@ -105,48 +145,6 @@ static void ICACHE_FLASH_ATTR app_init(void)
 
     // initialize our serial control access to epson projector
     SerialControl_init();
-    os_delay_us(1000000);
-
-    if( Epson_init() != 0){
-        os_printf("Hmmm, communicating with the projector failed\n");
-        return;
-    }
-    
-    os_delay_us(200000); // 200 ms
-
-    PowerStateEnum pwrState = 0;
-    if( Epson_GetPowerState(&pwrState) < 0){
-        os_printf("Getting the power state totally failed\n");
-        return;
-    }
-
-    
-
-    // give it a second
-    os_delay_us(200000); // 200 ms
-
-    switch(pwrState){
-        case e_standby:
-            // turn on projector
-            os_printf("Projector is off, so im gunna turn it on\n");
-            Epson_PowerOn();
-            break;
-        case e_poweredOn:
-            os_printf("Projector is on, so im gunna turn it off\n");
-            Epson_PowerOff();
-            break;
-        case e_warmUp:
-            os_printf("Projector is warmingUp, Doing Nothing\n");  
-            break;
-        case e_coolDown:
-            os_printf("Projector is cooling down, Doing Nothing\n");
-            break;
-        case e_networkStandby:
-        case e_abnormalStandby:
-        default:
-            os_printf("Current power state is %d\n", pwrState);
-            break;
-    }
 }
 
 void ICACHE_FLASH_ATTR user_init(void)

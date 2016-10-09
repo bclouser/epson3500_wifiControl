@@ -3,7 +3,7 @@
 #include "serialControl.h"
 #include "softuart.h"
 
-static const int timeout_msecs = 500;
+static const int timeout_msecs = 400;
 static Softuart softuart;
 
 void ICACHE_FLASH_ATTR SerialControl_init(void){
@@ -38,7 +38,6 @@ int ICACHE_FLASH_ATTR SerialControl_read(char* buf, int len){
 			timeSpentWaiting += 10;
 			// Check against timeout
 			if(timeSpentWaiting > timeout_msecs){
-				os_printf("We timed out\n");
 				return i;
 			}
 		}

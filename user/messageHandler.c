@@ -26,79 +26,40 @@ bool ICACHE_FLASH_ATTR handleMessage(char* messageBuf, uint32_t len)
 	int type = 0;
 	int buttonNum = 0;
 	int cmdKeyLen = 0;
-	while( (type = jsonparse_next(&js)) != JSON_TYPE_ERROR){
-		switch(type){
-			case JSON_TYPE_ARRAY:
-				os_printf("type = JSON_TYPE_ARRAY\n");
-				break;
-			case JSON_TYPE_OBJECT:
-				os_printf("type = JSON_TYPE_OBJECT\n");
-				break;
-			case JSON_TYPE_PAIR:
-				os_printf("type = JSON_TYPE_PAIR\n");
-				break;
-			case JSON_TYPE_PAIR_NAME:
-				os_printf("type = JSON_TYPE_PAIR_NAME\n");
-				break;
-			case JSON_TYPE_STRING:
-				os_printf("type = JSON_TYPE_STRING\n");
-				break;
-			case JSON_TYPE_INT:
-				os_printf("type = JSON_TYPE_INT\n");
-				break;
-			case JSON_TYPE_NUMBER:
-				os_printf("type = JSON_TYPE_NUMBER\n");
-				break;
-			case JSON_TYPE_ERROR:
-				os_printf("type = JSON_TYPE_ERROR\n");
-				break;
-			case JSON_TYPE_NULL:
-				os_printf("type = JSON_TYPE_NULL\n");
-				break;
-			case JSON_TYPE_TRUE:
-				os_printf("type = JSON_TYPE_TRUE\n");
-				break;
-			case JSON_TYPE_FALSE:
-				os_printf("type = JSON_TYPE_FALSE\n");
-				break;
-			case JSON_TYPE_CALLBACK:
-				os_printf("type = JSON_TYPE_CALLBACK\n");
-				break;
-			default:
-			 	os_printf("unknown type\n");
+	// first type is the object
+	type = jsonparse_next(&js);
+	// THis should be a key,value pair
+	type = jsonparse_next(&js);
+	
+	if( type == JSON_TYPE_PAIR_NAME ){
+		if( jsonparse_strcmp_value(&js, "command") == 0)
+		{
+			cmdKeyLen = jsonparse_copy_value(&js, buf, 32);
+
+			os_printf("Command Key received: %s. Length = %d\n", buf, cmdKeyLen);
+
+			type = jsonparse_next(&js);
+			// ok, so now look at the value
+			type = jsonparse_next(&js);
+			if( type == JSON_TYPE_STRING){
+				jsonparse_copy_value(&js, buf, 32);
+				os_printf("Here is the value: %s\n", buf);
+			}
+			else if(type == JSON_TYPE_INT || JSON_TYPE_NUMBER){
+				jsonparse_copy_value(&js, buf, 32);
+				//os_printf("Here is the value: %s\n", buf);
+				uint8 commandId = jsonparse_get_value_as_int(&js);
+				//os_printf("Command as an int %d\n", commandId);
+				Epson_ProcessCommand(commandId);
+			}
+			else{
+				os_printf("BAD PARSE! Couldn't find value associated with key!\n");
+			}
 		}
-
-		// Found a key-value pair!
-		if( type == JSON_TYPE_PAIR_NAME ){
-			if( jsonparse_strcmp_value(&js, "command") == 0)
-			{
-				cmdKeyLen = jsonparse_copy_value(&js, buf, 32);
-
-				os_printf("Command Key received: %s. Length = %d\n", buf, cmdKeyLen);
-
-				type = jsonparse_next(&js);
-				// ok, so now look at the value
-				type = jsonparse_next(&js);
-				if( type == JSON_TYPE_STRING){
-					jsonparse_copy_value(&js, buf, 32);
-					os_printf("Here is the value: %s\n", buf);
-				}
-				else if(type == JSON_TYPE_INT || JSON_TYPE_NUMBER){
-					jsonparse_copy_value(&js, buf, 32);
-					//os_printf("Here is the value: %s\n", buf);
-					uint8 commandId = jsonparse_get_value_as_int(&js);
-					//os_printf("Command as an int %d\n", commandId);
-					Epson_ProcessCommand(commandId);
-				}
-				else{
-					os_printf("BAD PARSE! Couldn't find value associated with key!\n");
-				}
-			}
-			else
-			{
-				os_printf("Hmmm, key value was not a string\n");
-				return false;
-			}
+		else
+		{
+			os_printf("Hmmm, key value was not a string\n");
+			return false;
 		}
 	}
 	return true;
