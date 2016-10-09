@@ -1,0 +1,5 @@
+secrets.h
+*.o
+*.out
+*.bin
+*.a
