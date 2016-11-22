@@ -115,6 +115,22 @@ int Epson_GetErrors(ProjectorErrorEnum* error){
 	return 0;
 }
 
+int Epson_VolumeChange(VolumeDirection direction){
+	// Get rid of any leftover junk in our rx buffer
+	SerialControl_flushRx();
+	if(direction == e_volumeUp){
+		SerialControl_write("VOL INC\r");
+	}
+	else if(direction == e_volumeDown){
+		SerialControl_write("VOL DEC\r");
+	}
+	else{
+		os_printf("value volume specified\n");
+	}
+	SerialControl_flushRx();
+	return 0;
+}
+
 void Epson_ProcessCommand(int commandId){
 	PowerStateEnum pwrState;
 	ProjectorErrorEnum projectorError;
@@ -149,7 +165,13 @@ void Epson_ProcessCommand(int commandId){
 				os_printf("Failed to get error status of projector\n");
 				//publish_message(Shit went wrong);
 			}
-			//publish_message(here is status);
+		case 5: // Volume Up
+			os_printf("Turning the projector volume up one...\n");
+			Epson_VolumeChange(e_volumeUp);
+			break;
+		case 6: // Volume Down
+			os_printf("Turning the projector volume down one...\n");
+			Epson_VolumeChange(e_volumeDown);
 			break;
 		default:
 			break;

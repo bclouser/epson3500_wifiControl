@@ -1,6 +1,6 @@
 #include "ets_sys.h"
 
-typedef enum{
+typedef enum {
 	e_standby = 0,
 	e_poweredOn,
 	e_warmUp,
@@ -9,7 +9,12 @@ typedef enum{
 	e_abnormalStandby
 }PowerStateEnum;
 
-typedef enum{
+typedef	enum {
+	e_volumeUp,
+	e_volumeDown
+} VolumeDirection;
+
+typedef enum {
 	e_errNone=0x00, //There is no error or the error is recovered
 	e_errFan=0x01, //Fan error
 	e_errLampPwrON=0x03, //Lamp failure at power on

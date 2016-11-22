@@ -127,7 +127,7 @@ static void ICACHE_FLASH_ATTR app_init(void)
     uart_init(BIT_RATE_115200, BIT_RATE_115200);
     //print_info();
     //MQTT_InitConnection(&mqttClient, MQTT_HOST, MQTT_PORT, DEFAULT_SECURITY);
-    MQTT_InitConnection(&mqttClient, "192.168.0.199", 1883, 0);
+    MQTT_InitConnection(&mqttClient, "192.168.1.199", 1883, 0);
 
     //MQTT_InitClient(&mqttClient, MQTT_CLIENT_ID, MQTT_USER, MQTT_PASS, MQTT_KEEPALIVE, MQTT_CLEAN_SESSION);
     MQTT_InitClient(&mqttClient, "projector", "", "", 120, 1);
