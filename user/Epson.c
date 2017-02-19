@@ -138,12 +138,12 @@ void Epson_ProcessCommand(int commandId){
 
 	switch(commandId){
 		case 0:
-			os_printf("Powering on projector...\n");
-			Epson_PowerOn();
-			break;
-		case 1:
 			os_printf("Powering off projector...\n");
 			Epson_PowerOff();
+			break;
+		case 1:
+			os_printf("Powering on projector...\n");
+			Epson_PowerOn();
 			break;
 		case 2:
 			os_printf("Getting power state of projector...\n");
